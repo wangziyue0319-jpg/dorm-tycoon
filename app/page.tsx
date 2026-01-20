@@ -786,7 +786,7 @@ export default function DormTycoon() {
               className="flex-1 rounded-t transition-all duration-300"
               style={{
                 height: `${Math.max(10, height)}%`,
-                backgroundColor: isUp ? '#22c55e' : '#ef4444',
+                backgroundColor: isUp ? '#ef4444' : '#22c55e', // 红涨绿跌
               }}
             />
           );
@@ -998,12 +998,12 @@ export default function DormTycoon() {
                 const changePercent = ((stock.price - stock.previousPrice) / stock.previousPrice) * 100;
                 const isUp = changePercent >= 0;
 
-                // 板块颜色
+                // 板块颜色 - 马卡龙配色
                 const sectorColors: Record<Sector, string> = {
-                  '内卷': 'bg-purple-600',
-                  '消费': 'bg-orange-600',
-                  '基建': 'bg-blue-600',
-                  '社交': 'bg-pink-600',
+                  '内卷': 'bg-[#B2DFDB]',
+                  '消费': 'bg-[#F8BBD0]',
+                  '基建': 'bg-[#BBDEFB]',
+                  '社交': 'bg-[#E1BEE7]',
                 };
 
                 // 持仓上限和泡沫警告
@@ -1040,9 +1040,9 @@ export default function DormTycoon() {
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         {isUp ? (
-                          <TrendingUp className="text-green-400" size={16} />
+                          <TrendingUp className="text-red-500" size={16} />
                         ) : (
-                          <TrendingDown className="text-red-400" size={16} />
+                          <TrendingDown className="text-green-500" size={16} />
                         )}
                         {isBubbleRisk && (
                           <span className="text-xs text-red-400 font-bold">⚠️ 泡沫</span>
@@ -1055,7 +1055,7 @@ export default function DormTycoon() {
 
                     <div>
                       <p className={`text-xl font-bold ${isFund ? 'text-amber-300' : ''}`}>¥{stock.price.toFixed(2)}</p>
-                      <p className={`text-xs ${isUp ? 'text-green-400' : 'text-red-400'}`}>
+                      <p className={`text-xs ${isUp ? 'text-red-500' : 'text-green-500'}`}>
                         {isUp ? '+' : ''}{changePercent.toFixed(2)}%
                       </p>
                     </div>
