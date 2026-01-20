@@ -1124,7 +1124,7 @@ export default function DormTycoon() {
               <button
                 onClick={doPartTimeJob}
                 disabled={energy < 30 || actionPoints <= 0}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition flex items-center justify-center gap-2"
+                className="w-full py-3 bg-[#e0f7fa] hover:bg-[#b2ebf2] disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg font-semibold transition flex items-center justify-center gap-2 text-gray-800"
               >
                 <Briefcase size={20} />
                 兼职工作 (-30精力, -1行动点)
@@ -1132,26 +1132,26 @@ export default function DormTycoon() {
               <button
                 onClick={doStudy}
                 disabled={energy < Math.floor(40 * studyCostMultiplier) || actionPoints <= 0}
-                className="w-full py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition flex items-center justify-center gap-2"
+                className="w-full py-3 bg-[#e0f7fa] hover:bg-[#b2ebf2] disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg font-semibold transition flex items-center justify-center gap-2 text-gray-800"
               >
                 <BookOpen size={20} />
                 努力学习 (-{Math.floor(40 * studyCostMultiplier)}精力, -1行动点
-                {studyCostMultiplier > 1 && <span className="text-yellow-300 text-xs">x{studyCostMultiplier}</span>})
+                {studyCostMultiplier > 1 && <span className="text-orange-600 text-xs">x{studyCostMultiplier}</span>})
               </button>
               <button
                 onClick={doResearch}
                 disabled={energy < 20 || actionPoints <= 0}
-                className="w-full py-3 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition flex items-center justify-center gap-2"
+                className="w-full py-3 bg-[#e0f7fa] hover:bg-[#b2ebf2] disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg font-semibold transition flex items-center justify-center gap-2 text-gray-800"
               >
                 <Search size={20} />
                 市场调研 (-20精力, -1行动点)
               </button>
               <button
                 onClick={doRest}
-                className={`w-full py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 ${
+                className={`w-full py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 text-gray-800 ${
                   actionPoints === 0
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 animate-pulse shadow-lg shadow-green-500/50'
-                    : 'bg-yellow-600 hover:bg-yellow-700'
+                    ? 'bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 animate-pulse shadow-lg shadow-green-500/50'
+                    : 'bg-[#e0f7fa] hover:bg-[#b2ebf2]'
                 }`}
               >
                 <Moon size={20} />
