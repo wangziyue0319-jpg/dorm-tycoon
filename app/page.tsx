@@ -278,10 +278,14 @@ export default function DormTycoon() {
 
     const bonus = goodCardDays > 0 ? 10 : 0;
     setEnergy(prev => Math.min(100, prev + 50 + bonus));
+
+    // 重置行动点，让玩家可以继续新的一天
+    setActionPoints(maxActionPoints);
+
     if (bonus > 0) {
-      addLog(`好好休息，精力+${50 + bonus}（好人卡加成+${bonus}）`, 'success');
+      addLog(`好好休息，精力+${50 + bonus}（好人卡加成+${bonus}），行动点已恢复`, 'success');
     } else {
-      addLog('好好休息，精力+50', 'success');
+      addLog('好好休息，精力+50，行动点已恢复', 'success');
     }
   };
 
@@ -502,6 +506,7 @@ export default function DormTycoon() {
     // 继续完成一天结算
     const nextDay = currentDay + 1;
     setCurrentDay(nextDay);
+    setActionPoints(maxActionPoints); // 重置行动点
 
     // 检查游戏胜利
     if (nextDay > totalDays) {
