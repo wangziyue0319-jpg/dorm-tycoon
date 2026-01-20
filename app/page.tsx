@@ -797,14 +797,14 @@ export default function DormTycoon() {
 
   if (gameOver) {
     return (
-      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#E0F7FA] via-[#F3E5F5] to-[#FCE4EC] flex items-center justify-center p-4">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">游戏结束</h1>
-          <p className="text-xl mb-2">总资产: ¥{calculateTotalAssets().toFixed(2)}</p>
-          <p className="text-gray-400 mb-6">持续了 {currentDay} 天</p>
+          <h1 className="text-4xl font-bold mb-4 text-gray-900">游戏结束</h1>
+          <p className="text-xl mb-2 text-gray-800">总资产: ¥{calculateTotalAssets().toFixed(2)}</p>
+          <p className="text-gray-600 mb-6">持续了 {currentDay} 天</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition"
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition"
           >
             重新开始
           </button>
@@ -919,7 +919,7 @@ export default function DormTycoon() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#E0F7FA] via-[#F3E5F5] to-[#FCE4EC] text-gray-900 p-4">
       <div className="max-w-7xl mx-auto space-y-4">
         {/* 顶部状态栏 */}
         <div className="bg-gray-800 rounded-lg p-4 flex flex-wrap items-center justify-between gap-4">
