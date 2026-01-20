@@ -816,27 +816,26 @@ export default function DormTycoon() {
   // 欢迎页面
   if (!isGameStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-[#E0F7FA] via-[#F3E5F5] to-[#FCE4EC] flex items-center justify-center p-4 relative overflow-hidden">
         {/* 背景装饰 */}
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
         <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-10 left-10 w-32 h-32 bg-yellow-400/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-20 w-48 h-48 bg-purple-400/10 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-pink-400/10 rounded-full blur-3xl"></div>
+          <div className="absolute top-10 left-10 w-32 h-32 bg-pink-300/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-20 w-48 h-48 bg-purple-300/20 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-blue-300/20 rounded-full blur-3xl"></div>
         </div>
 
         {/* 欢迎页面内容 */}
         <div className="relative z-10 max-w-4xl w-full">
-          <div className="bg-gray-900/60 backdrop-blur-md rounded-2xl p-8 md:p-12 shadow-2xl border border-white/10">
+          <div className="bg-white rounded-2xl p-8 md:p-12 shadow-2xl border border-pink-200">
             {/* 标题 */}
             <div className="text-center mb-8">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
                 寝室大亨
               </h1>
-              <p className="text-xl md:text-2xl text-white/90 font-semibold">
+              <p className="text-xl md:text-2xl text-gray-800 font-semibold">
                 28天生存挑战
               </p>
-              <p className="text-sm text-gray-300 mt-2">
+              <p className="text-sm text-gray-600 mt-2">
                 从¥500到¥2000的理财之路
               </p>
             </div>
@@ -844,54 +843,54 @@ export default function DormTycoon() {
             {/* 游戏规则 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {/* 目标 */}
-              <div className="bg-white/5 rounded-lg p-6 border border-white/10 hover:border-yellow-400/50 transition">
+              <div className="bg-white rounded-lg p-6 border-2 border-yellow-200 hover:border-yellow-400 transition shadow-md">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-yellow-400/20 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
                     <span className="text-2xl">🎯</span>
                   </div>
-                  <h3 className="text-lg font-bold text-yellow-400">目标</h3>
+                  <h3 className="text-lg font-bold text-yellow-700">目标</h3>
                 </div>
-                <p className="text-sm text-gray-300 leading-relaxed">
-                  作为刚入学的大学生，需在28天内通过投资与兼职，将<span className="text-green-400 font-semibold">¥500</span>变成<span className="text-green-400 font-semibold">¥2000</span>。注意：不能因精力耗尽或欠债而"退学"。
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  作为刚入学的大学生，需在28天内通过投资与兼职，将<span className="text-green-600 font-semibold">¥500</span>变成<span className="text-green-600 font-semibold">¥2000</span>。注意：不能因精力耗尽或欠债而"退学"。
                 </p>
               </div>
 
               {/* 行动力限制 */}
-              <div className="bg-white/5 rounded-lg p-6 border border-white/10 hover:border-blue-400/50 transition">
+              <div className="bg-white rounded-lg p-6 border-2 border-blue-200 hover:border-blue-400 transition shadow-md">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-blue-400/20 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                     <span className="text-2xl">⚡</span>
                   </div>
-                  <h3 className="text-lg font-bold text-blue-400">行动力限制</h3>
+                  <h3 className="text-lg font-bold text-blue-700">行动力限制</h3>
                 </div>
-                <p className="text-sm text-gray-300 leading-relaxed">
-                  每天只有<span className="text-blue-300 font-semibold">2次行动机会</span>（消耗行动点）。请在兼职赚钱、图书馆学习、市场调研间做出权衡。
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  每天只有<span className="text-blue-600 font-semibold">2次行动机会</span>（消耗行动点）。请在兼职赚钱、图书馆学习、市场调研间做出权衡。
                 </p>
               </div>
 
               {/* 投资逻辑 */}
-              <div className="bg-white/5 rounded-lg p-6 border border-white/10 hover:border-purple-400/50 transition">
+              <div className="bg-white rounded-lg p-6 border-2 border-purple-200 hover:border-purple-400 transition shadow-md">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-purple-400/20 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                     <span className="text-2xl">📈</span>
                   </div>
-                  <h3 className="text-lg font-bold text-purple-400">投资逻辑</h3>
+                  <h3 className="text-lg font-bold text-purple-700">投资逻辑</h3>
                 </div>
-                <p className="text-sm text-gray-300 leading-relaxed">
-                  个股（如显卡、奶茶）波动剧烈，混合基金相对稳健。注意：<span className="text-purple-300 font-semibold">你的智力值越高</span>，能操控的资金规模就越大。
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  个股（如显卡、奶茶）波动剧烈，混合基金相对稳健。注意：<span className="text-purple-600 font-semibold">你的智力值越高</span>，能操控的资金规模就越大。
                 </p>
               </div>
 
               {/* 生存警示 */}
-              <div className="bg-white/5 rounded-lg p-6 border border-white/10 hover:border-red-400/50 transition">
+              <div className="bg-white rounded-lg p-6 border-2 border-red-200 hover:border-red-400 transition shadow-md">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-red-400/20 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
                     <span className="text-2xl">⚠️</span>
                   </div>
-                  <h3 className="text-lg font-bold text-red-400">生存警示</h3>
+                  <h3 className="text-lg font-bold text-red-700">生存警示</h3>
                 </div>
-                <p className="text-sm text-gray-300 leading-relaxed">
-                  每天会扣除<span className="text-red-300 font-semibold">¥30生活费</span>。资产翻倍会触发更多校园突发事件。请时刻关注你的精力值，归零即意味着游戏结束。
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  每天会扣除<span className="text-red-600 font-semibold">¥30生活费</span>。资产翻倍会触发更多校园突发事件。请时刻关注你的精力值，归零即意味着游戏结束。
                 </p>
               </div>
             </div>
@@ -903,14 +902,14 @@ export default function DormTycoon() {
                   setIsGameStarted(true);
                   setLogs([{ id: 1, day: 1, message: '欢迎来到寝室大亨！你的28天理财挑战开始了！', type: 'info' }]);
                 }}
-                className="px-8 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 rounded-lg font-bold text-lg transition-all animate-bounce hover:scale-105 shadow-lg hover:shadow-xl"
+                className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white rounded-lg font-bold text-lg transition-all animate-bounce hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 <span className="flex items-center gap-2">
                   <span>🚀</span>
                   <span>开启校园生活</span>
                 </span>
               </button>
-              <p className="text-xs text-gray-400 mt-4">点击开始你的理财之旅</p>
+              <p className="text-xs text-gray-500 mt-4">点击开始你的理财之旅</p>
             </div>
           </div>
         </div>
@@ -922,7 +921,7 @@ export default function DormTycoon() {
     <div className="min-h-screen bg-gradient-to-br from-[#E0F7FA] via-[#F3E5F5] to-[#FCE4EC] text-gray-900 p-4">
       <div className="max-w-7xl mx-auto space-y-4">
         {/* 顶部状态栏 */}
-        <div className="bg-[#F3E5F5] rounded-lg p-4 flex flex-wrap items-center justify-between gap-4 shadow-md">
+        <div className="bg-white rounded-lg p-4 flex flex-wrap items-center justify-between gap-4 shadow-md">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <DollarSign className="text-green-600" size={24} />
@@ -1021,7 +1020,7 @@ export default function DormTycoon() {
                     className={`rounded-lg p-3 space-y-2 shadow-md ${
                       isFund
                         ? 'bg-gradient-to-br from-amber-200 to-yellow-200 border-2 border-amber-400 shadow-lg shadow-amber-500/20'
-                        : `bg-[#F3E5F5] ${isBubbleRisk ? 'ring-2 ring-red-500' : ''}`
+                        : `bg-white ${isBubbleRisk ? 'ring-2 ring-red-500' : ''}`
                     }`}
                   >
                     <div className="flex justify-between items-start">
@@ -1121,7 +1120,7 @@ export default function DormTycoon() {
               每日行动
             </h2>
 
-            <div className="bg-[#F3E5F5] rounded-lg p-4 space-y-3 shadow-md">
+            <div className="bg-white rounded-lg p-4 space-y-3 shadow-md">
               <button
                 onClick={doPartTimeJob}
                 disabled={energy < 30 || actionPoints <= 0}
@@ -1162,7 +1161,7 @@ export default function DormTycoon() {
             </div>
 
             {/* 每日新闻 */}
-            <div className="bg-[#F3E5F5] rounded-lg p-4 shadow-md">
+            <div className="bg-white rounded-lg p-4 shadow-md">
               <h3 className="font-bold mb-2 flex items-center gap-2 text-gray-900">
                 <Newspaper size={20} />
                 每日新闻
@@ -1172,7 +1171,7 @@ export default function DormTycoon() {
 
             {/* 明日预测 */}
             {tomorrowForecast.length > 0 && (
-              <div className="bg-[#F3E5F5] rounded-lg p-4 shadow-md">
+              <div className="bg-white rounded-lg p-4 shadow-md">
                 <h3 className="font-bold mb-2 flex items-center gap-2 text-gray-900">
                   <Search size={20} />
                   明日走势预测
@@ -1199,7 +1198,7 @@ export default function DormTycoon() {
         </div>
 
         {/* 底部日志 */}
-        <div className="bg-[#F3E5F5] rounded-lg p-4 shadow-md">
+        <div className="bg-white rounded-lg p-4 shadow-md">
           <h2 className="text-xl font-bold mb-3 text-gray-900">操作日志</h2>
           <div className="h-48 overflow-y-auto space-y-2 text-sm">
             {logs.slice().reverse().map(log => {
@@ -1223,7 +1222,7 @@ export default function DormTycoon() {
       {/* 智力不足弹窗 */}
       {intelligenceAlert && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#F3E5F5] rounded-lg p-6 max-w-md w-full border-2 border-yellow-500 shadow-xl">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full border-2 border-yellow-500 shadow-xl">
             <div className="flex items-center gap-3 mb-4">
               <AlertTriangle className="text-yellow-600" size={32} />
               <h3 className="text-xl font-bold text-yellow-600">智力不足警告</h3>
@@ -1249,7 +1248,7 @@ export default function DormTycoon() {
       {/* 抉择事件弹窗 */}
       {currentChoiceEvent && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#F3E5F5] rounded-lg p-6 max-w-lg w-full border-2 border-orange-500 shadow-xl">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full border-2 border-orange-500 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-2xl font-bold text-orange-600">{currentChoiceEvent.title}</h3>
             </div>
@@ -1276,7 +1275,7 @@ export default function DormTycoon() {
 
       {/* 行动点不足提示 */}
       {actionToast && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-[#F3E5F5] border-2 border-red-500 rounded-lg px-6 py-4 z-50 animate-bounce shadow-xl">
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-white border-2 border-red-500 rounded-lg px-6 py-4 z-50 animate-bounce shadow-xl">
           <div className="flex items-center gap-3">
             <AlertTriangle className="text-red-600" size={24} />
             <p className="text-gray-900 font-semibold">今天的行动点已用完，回寝室休息吧！</p>
