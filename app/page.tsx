@@ -922,38 +922,38 @@ export default function DormTycoon() {
     <div className="min-h-screen bg-gradient-to-br from-[#E0F7FA] via-[#F3E5F5] to-[#FCE4EC] text-gray-900 p-4">
       <div className="max-w-7xl mx-auto space-y-4">
         {/* 顶部状态栏 */}
-        <div className="bg-gray-800 rounded-lg p-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-[#F3E5F5] rounded-lg p-4 flex flex-wrap items-center justify-between gap-4 shadow-md">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <DollarSign className="text-green-400" size={24} />
+              <DollarSign className="text-green-600" size={24} />
               <div>
-                <p className="text-xs text-gray-400">现金</p>
-                <p className="text-xl font-bold">¥{cash.toFixed(2)}</p>
+                <p className="text-xs text-gray-600">现金</p>
+                <p className="text-xl font-bold text-gray-900">¥{cash.toFixed(2)}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Zap className="text-yellow-400" size={24} />
+              <Zap className="text-yellow-600" size={24} />
               <div>
-                <p className="text-xs text-gray-400">精力</p>
-                <p className="text-xl font-bold">{energy}/100</p>
+                <p className="text-xs text-gray-600">精力</p>
+                <p className="text-xl font-bold text-gray-900">{energy}/100</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <BookOpen className="text-blue-400" size={24} />
+              <BookOpen className="text-blue-600" size={24} />
               <div>
-                <p className="text-xs text-gray-400">智力</p>
-                <p className="text-xl font-bold">{intelligence}</p>
+                <p className="text-xs text-gray-600">智力</p>
+                <p className="text-xl font-bold text-gray-900">{intelligence}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <div>
-                <p className="text-xs text-gray-400">行动点</p>
+                <p className="text-xs text-gray-600">行动点</p>
                 <div className="flex gap-1 items-center">
                   {Array.from({ length: maxActionPoints }).map((_, i) => (
                     <div
                       key={i}
                       className={`w-3 h-3 rounded-full transition-all ${
-                        i < actionPoints ? 'bg-green-400' : 'bg-gray-600'
+                        i < actionPoints ? 'bg-green-500' : 'bg-gray-400'
                       }`}
                     />
                   ))}
@@ -962,27 +962,27 @@ export default function DormTycoon() {
             </div>
             {goodCardDays > 0 && (
               <div className="flex items-center gap-2 bg-pink-600 px-3 py-1 rounded-lg">
-                <span className="text-sm">💳 好人卡</span>
-                <span className="text-sm font-bold">{goodCardDays}天</span>
+                <span className="text-sm text-white">💳 好人卡</span>
+                <span className="text-sm font-bold text-white">{goodCardDays}天</span>
               </div>
             )}
           </div>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <Calendar className="text-purple-400" size={24} />
+              <Calendar className="text-purple-600" size={24} />
               <div>
-                <p className="text-xs text-gray-400">天数</p>
-                <p className="text-xl font-bold">{currentDay}/{totalDays}</p>
+                <p className="text-xs text-gray-600">天数</p>
+                <p className="text-xl font-bold text-gray-900">{currentDay}/{totalDays}</p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-xs text-gray-400">单股持仓上限</p>
-              <p className="text-xl font-bold text-cyan-400">{getMaxHolding()} 股</p>
+              <p className="text-xs text-gray-600">单股持仓上限</p>
+              <p className="text-xl font-bold text-cyan-600">{getMaxHolding()} 股</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-400">总资产</p>
-            <p className="text-xl font-bold text-green-400">¥{calculateTotalAssets().toFixed(2)}</p>
+            <p className="text-xs text-gray-600">总资产</p>
+            <p className="text-xl font-bold text-green-600">¥{calculateTotalAssets().toFixed(2)}</p>
           </div>
         </div>
 
@@ -1018,44 +1018,44 @@ export default function DormTycoon() {
                 return (
                   <div
                     key={stock.id}
-                    className={`rounded-lg p-3 space-y-2 ${
+                    className={`rounded-lg p-3 space-y-2 shadow-md ${
                       isFund
-                        ? 'bg-gradient-to-br from-amber-900 to-yellow-900 border-2 border-amber-400 shadow-lg shadow-amber-500/20'
-                        : `bg-gray-800 ${isBubbleRisk ? 'ring-2 ring-red-500' : ''}`
+                        ? 'bg-gradient-to-br from-amber-200 to-yellow-200 border-2 border-amber-400 shadow-lg shadow-amber-500/20'
+                        : `bg-[#F3E5F5] ${isBubbleRisk ? 'ring-2 ring-red-500' : ''}`
                     }`}
                   >
                     <div className="flex justify-between items-start">
                       <div>
                         <div className="flex items-center gap-1">
-                          <span className={`text-xs px-2 py-0.5 rounded ${sectorColors[stock.sector]} text-white`}>
+                          <span className={`text-xs px-2 py-0.5 rounded ${sectorColors[stock.sector]} text-gray-800`}>
                             {stock.sector}
                           </span>
                           {isFund && (
-                            <span className="text-xs px-2 py-0.5 rounded bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold">
+                            <span className="text-xs px-2 py-0.5 rounded bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold">
                               🏆 基金
                             </span>
                           )}
                         </div>
-                        <h3 className={`font-bold text-sm mt-1 ${isFund ? 'text-amber-300' : ''}`}>{stock.name}</h3>
+                        <h3 className={`font-bold text-sm mt-1 ${isFund ? 'text-amber-800' : 'text-gray-900'}`}>{stock.name}</h3>
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         {isUp ? (
-                          <TrendingUp className="text-red-500" size={16} />
+                          <TrendingUp className="text-red-600" size={16} />
                         ) : (
-                          <TrendingDown className="text-green-500" size={16} />
+                          <TrendingDown className="text-green-600" size={16} />
                         )}
                         {isBubbleRisk && (
-                          <span className="text-xs text-red-400 font-bold">⚠️ 泡沫</span>
+                          <span className="text-xs text-red-600 font-bold">⚠️ 泡沫</span>
                         )}
                         {isFund && stock.holdingDays !== undefined && stock.holdingDays > 0 && (
-                          <span className="text-xs text-amber-400">📅 {stock.holdingDays}天</span>
+                          <span className="text-xs text-amber-700">📅 {stock.holdingDays}天</span>
                         )}
                       </div>
                     </div>
 
                     <div>
-                      <p className={`text-xl font-bold ${isFund ? 'text-amber-300' : ''}`}>¥{stock.price.toFixed(2)}</p>
-                      <p className={`text-xs ${isUp ? 'text-red-500' : 'text-green-500'}`}>
+                      <p className={`text-xl font-bold ${isFund ? 'text-amber-800' : 'text-gray-900'}`}>¥{stock.price.toFixed(2)}</p>
+                      <p className={`text-xs ${isUp ? 'text-red-600' : 'text-green-600'}`}>
                         {isUp ? '+' : ''}{changePercent.toFixed(2)}%
                       </p>
                     </div>
@@ -1063,22 +1063,22 @@ export default function DormTycoon() {
                     {renderChart(stock)}
 
                     <div className="space-y-1">
-                      <div className="flex justify-between text-xs text-gray-400">
+                      <div className="flex justify-between text-xs text-gray-600">
                         <span>持仓: {stock.held}/{maxHolding}</span>
                         {stock.consecutiveUpDays > 0 && (
-                          <span className={stock.consecutiveUpDays >= 3 ? 'text-red-400' : 'text-gray-400'}>
+                          <span className={stock.consecutiveUpDays >= 3 ? 'text-red-600' : 'text-gray-600'}>
                             ↑{stock.consecutiveUpDays}天
                           </span>
                         )}
                       </div>
                       {/* 基金智力门槛提示 */}
                       {isFund && intelligence < 20 && (
-                        <div className="text-xs text-amber-400">
+                        <div className="text-xs text-amber-700">
                           🔒 需要智力 20 解锁
                         </div>
                       )}
                       {/* 持仓进度条 */}
-                      <div className="w-full bg-gray-700 rounded-full h-1.5">
+                      <div className="w-full bg-gray-300 rounded-full h-1.5">
                         <div
                           className={`h-1.5 rounded-full transition-all ${
                             isNearLimit ? 'bg-red-500' : holdingPercentage >= 50 ? 'bg-yellow-500' : 'bg-green-500'
@@ -1096,14 +1096,14 @@ export default function DormTycoon() {
                           stock.held >= maxHolding ||
                           (stock.isFund && intelligence < 20)
                         }
-                        className="flex-1 py-1.5 text-sm bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded font-semibold transition"
+                        className="flex-1 py-1.5 text-sm bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded font-semibold transition text-white"
                       >
                         买入
                       </button>
                       <button
                         onClick={() => sellStock(stock.id)}
                         disabled={stock.held <= 0}
-                        className="flex-1 py-1.5 text-sm bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded font-semibold transition"
+                        className="flex-1 py-1.5 text-sm bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded font-semibold transition text-white"
                       >
                         卖出
                       </button>
@@ -1121,7 +1121,7 @@ export default function DormTycoon() {
               每日行动
             </h2>
 
-            <div className="bg-gray-800 rounded-lg p-4 space-y-3">
+            <div className="bg-[#F3E5F5] rounded-lg p-4 space-y-3 shadow-md">
               <button
                 onClick={doPartTimeJob}
                 disabled={energy < 30 || actionPoints <= 0}
@@ -1162,22 +1162,22 @@ export default function DormTycoon() {
             </div>
 
             {/* 每日新闻 */}
-            <div className="bg-gray-800 rounded-lg p-4">
-              <h3 className="font-bold mb-2 flex items-center gap-2">
+            <div className="bg-[#F3E5F5] rounded-lg p-4 shadow-md">
+              <h3 className="font-bold mb-2 flex items-center gap-2 text-gray-900">
                 <Newspaper size={20} />
                 每日新闻
               </h3>
-              <p className="text-sm text-gray-300">{news}</p>
+              <p className="text-sm text-gray-700">{news}</p>
             </div>
 
             {/* 明日预测 */}
             {tomorrowForecast.length > 0 && (
-              <div className="bg-gray-800 rounded-lg p-4">
-                <h3 className="font-bold mb-2 flex items-center gap-2">
+              <div className="bg-[#F3E5F5] rounded-lg p-4 shadow-md">
+                <h3 className="font-bold mb-2 flex items-center gap-2 text-gray-900">
                   <Search size={20} />
                   明日走势预测
                 </h3>
-                <ul className="text-sm text-gray-300 space-y-1">
+                <ul className="text-sm text-gray-700 space-y-1">
                   {tomorrowForecast.map((forecast, idx) => (
                     <li key={idx}>• {forecast}</li>
                   ))}
@@ -1199,15 +1199,15 @@ export default function DormTycoon() {
         </div>
 
         {/* 底部日志 */}
-        <div className="bg-gray-800 rounded-lg p-4">
-          <h2 className="text-xl font-bold mb-3">操作日志</h2>
+        <div className="bg-[#F3E5F5] rounded-lg p-4 shadow-md">
+          <h2 className="text-xl font-bold mb-3 text-gray-900">操作日志</h2>
           <div className="h-48 overflow-y-auto space-y-2 text-sm">
             {logs.slice().reverse().map(log => {
               const colorClass = {
-                info: 'text-blue-400',
-                success: 'text-green-400',
-                warning: 'text-yellow-400',
-                error: 'text-red-400',
+                info: 'text-blue-600',
+                success: 'text-green-600',
+                warning: 'text-yellow-600',
+                error: 'text-red-600',
               }[log.type];
 
               return (
@@ -1223,22 +1223,22 @@ export default function DormTycoon() {
       {/* 智力不足弹窗 */}
       {intelligenceAlert && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full border-2 border-yellow-500">
+          <div className="bg-[#F3E5F5] rounded-lg p-6 max-w-md w-full border-2 border-yellow-500 shadow-xl">
             <div className="flex items-center gap-3 mb-4">
-              <AlertTriangle className="text-yellow-500" size={32} />
-              <h3 className="text-xl font-bold text-yellow-500">智力不足警告</h3>
+              <AlertTriangle className="text-yellow-600" size={32} />
+              <h3 className="text-xl font-bold text-yellow-600">智力不足警告</h3>
             </div>
-            <p className="text-gray-300 mb-6">
+            <p className="text-gray-700 mb-6">
               你的智力值不足以驾驭更多资产，快去图书馆学习！
             </p>
-            <div className="bg-gray-700 rounded p-4 mb-4">
-              <p className="text-sm text-gray-400">当前智力: {intelligence}</p>
-              <p className="text-sm text-gray-400">单股持仓上限: {getMaxHolding()} 股</p>
-              <p className="text-sm text-cyan-400 mt-2">提示：努力学习可提升智力，增加持仓上限</p>
+            <div className="bg-white rounded p-4 mb-4 shadow">
+              <p className="text-sm text-gray-600">当前智力: {intelligence}</p>
+              <p className="text-sm text-gray-600">单股持仓上限: {getMaxHolding()} 股</p>
+              <p className="text-sm text-cyan-600 mt-2">提示：努力学习可提升智力，增加持仓上限</p>
             </div>
             <button
               onClick={() => setIntelligenceAlert(false)}
-              className="w-full py-3 bg-yellow-600 hover:bg-yellow-700 rounded-lg font-semibold transition"
+              className="w-full py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-semibold transition"
             >
               知道了
             </button>
@@ -1249,25 +1249,25 @@ export default function DormTycoon() {
       {/* 抉择事件弹窗 */}
       {currentChoiceEvent && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg p-6 max-w-lg w-full border-2 border-orange-500">
+          <div className="bg-[#F3E5F5] rounded-lg p-6 max-w-lg w-full border-2 border-orange-500 shadow-xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-2xl font-bold text-orange-500">{currentChoiceEvent.title}</h3>
+              <h3 className="text-2xl font-bold text-orange-600">{currentChoiceEvent.title}</h3>
             </div>
-            <p className="text-gray-300 mb-6 text-lg">{currentChoiceEvent.description}</p>
+            <p className="text-gray-700 mb-6 text-lg">{currentChoiceEvent.description}</p>
             <div className="space-y-3">
               <button
                 onClick={() => handleChoice('A')}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition text-left px-6"
+                className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition text-left px-6"
               >
                 <div className="font-bold mb-1">A. {currentChoiceEvent.optionA.text.split('(')[0]}</div>
-                <div className="text-sm text-gray-300">({currentChoiceEvent.optionA.text.split('(')[1]}</div>
+                <div className="text-sm text-blue-100">({currentChoiceEvent.optionA.text.split('(')[1]}</div>
               </button>
               <button
                 onClick={() => handleChoice('B')}
-                className="w-full py-4 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition text-left px-6"
+                className="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition text-left px-6"
               >
                 <div className="font-bold mb-1">B. {currentChoiceEvent.optionB.text.split('(')[0]}</div>
-                <div className="text-sm text-gray-300">({currentChoiceEvent.optionB.text.split('(')[1]}</div>
+                <div className="text-sm text-red-100">({currentChoiceEvent.optionB.text.split('(')[1]}</div>
               </button>
             </div>
           </div>
@@ -1276,10 +1276,10 @@ export default function DormTycoon() {
 
       {/* 行动点不足提示 */}
       {actionToast && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-gray-800 border-2 border-red-500 rounded-lg px-6 py-4 z-50 animate-bounce">
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-[#F3E5F5] border-2 border-red-500 rounded-lg px-6 py-4 z-50 animate-bounce shadow-xl">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="text-red-500" size={24} />
-            <p className="text-white font-semibold">今天的行动点已用完，回寝室休息吧！</p>
+            <AlertTriangle className="text-red-600" size={24} />
+            <p className="text-gray-900 font-semibold">今天的行动点已用完，回寝室休息吧！</p>
           </div>
         </div>
       )}
