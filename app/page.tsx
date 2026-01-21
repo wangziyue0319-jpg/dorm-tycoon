@@ -18,7 +18,9 @@ import {
 } from 'lucide-react';
 
 // 类型定义
-type Sector = '内卷' | '消费' | '基建' | '社交';
+type Sector = '消费' | '硬件' | '内卷' | '基建';
+type FundType = '混合型' | '股票型' | '债券型';
+type RiskLevel = 'R1' | 'R2' | 'R3' | 'R4' | 'R5';
 
 interface Stock {
   id: number;
@@ -28,10 +30,13 @@ interface Stock {
   previousPrice: number;
   held: number;
   history: number[];
-  volatility: number; // 波动率
+  volatility: number; // 基础波动率
   consecutiveUpDays: number; // 连续上涨天数
   isFund?: boolean; // 是否为基金
   holdingDays?: number; // 持有天数（用于基金分红）
+  fundType?: 'high' | 'medium' | 'low' | 'stable'; // 基金波动类型
+  type?: FundType; // 基金类型
+  riskLevel?: RiskLevel; // 风险等级
 }
 
 interface RandomEvent {
@@ -86,6 +91,10 @@ export default function DormTycoon() {
   const [actionToast, setActionToast] = useState(false); // 行动点不足提示
   const [apologyPenalty, setApologyPenalty] = useState(0); // 写检讨惩罚（消耗行动点）
 
+  // 每日新闻弹窗状态
+  const [showDailyNews, setShowDailyNews] = useState(false); // 显示每日新闻弹窗
+  const [pendingNews, setPendingNews] = useState(''); // 待显示的新闻
+
   // 舍友抽烟事件相关状态
   const [justiceMessenger, setJusticeMessenger] = useState(false); // 正义使者称号（等待报复）
   const [roommateGoneDays, setRoommateGoneDays] = useState(0); // 舍友搬离剩余天数
@@ -93,21 +102,76 @@ export default function DormTycoon() {
   const [hasBadReputation, setHasBadReputation] = useState(false); // 变坏标记（辅导员查寝时可能被判定为从犯）
   const [maxEnergyBonus, setMaxEnergyBonus] = useState(0); // 精力上限加成
 
-  // 股票数据 - 扩充到7只 + 1只基金
+  // 基金数据 - 重构为4只核心基金
   const [stocks, setStocks] = useState<Stock[]>([
-    // 社交板块
-    { id: 1, name: '蜜雪冰城', sector: '社交', price: 10.0, previousPrice: 10.0, held: 0, history: [10.0], volatility: 0.15, consecutiveUpDays: 0 },
-    // 消费板块 - 高波动
-    { id: 2, name: '显卡外设', sector: '消费', price: 50.0, previousPrice: 50.0, held: 0, history: [50.0], volatility: 0.35, consecutiveUpDays: 0 },
-    // 内卷板块 - 与智力正相关
-    { id: 3, name: '薪火求职', sector: '内卷', price: 20.0, previousPrice: 20.0, held: 0, history: [20.0], volatility: 0.20, consecutiveUpDays: 0 },
-    { id: 4, name: '考研真题集', sector: '内卷', price: 15.0, previousPrice: 15.0, held: 0, history: [15.0], volatility: 0.18, consecutiveUpDays: 0 },
-    // 基建板块 - 低风险，受事件影响大
-    { id: 5, name: '校园网流量', sector: '基建', price: 8.0, previousPrice: 8.0, held: 0, history: [8.0], volatility: 0.08, consecutiveUpDays: 0 },
-    { id: 6, name: '共享单车', sector: '基建', price: 12.0, previousPrice: 12.0, held: 0, history: [12.0], volatility: 0.10, consecutiveUpDays: 0 },
-    { id: 7, name: '外卖服务', sector: '基建', price: 18.0, previousPrice: 18.0, held: 0, history: [18.0], volatility: 0.09, consecutiveUpDays: 0 },
-    // 校园混合成长基金 - 特殊理财
-    { id: 8, name: '校园混合成长基金', sector: '内卷', price: 30.0, previousPrice: 30.0, held: 0, history: [30.0], volatility: 0.05, consecutiveUpDays: 0, isFund: true, holdingDays: 0 },
+    // 基金 A - 混合型 R3
+    {
+      id: 1,
+      name: '混合型-校园多巴胺综合精选',
+      sector: '消费',
+      price: 15.0,
+      previousPrice: 15.0,
+      held: 0,
+      history: [15.0],
+      volatility: 0.25,
+      consecutiveUpDays: 0,
+      isFund: true,
+      holdingDays: 0,
+      fundType: 'high',
+      type: '混合型',
+      riskLevel: 'R3'
+    },
+    // 基金 B - 股票型 R5
+    {
+      id: 2,
+      name: '股票型-赛博消闲娱乐ETF',
+      sector: '硬件',
+      price: 50.0,
+      previousPrice: 50.0,
+      held: 0,
+      history: [50.0],
+      volatility: 0.45,
+      consecutiveUpDays: 0,
+      isFund: true,
+      holdingDays: 0,
+      fundType: 'high',
+      type: '股票型',
+      riskLevel: 'R5'
+    },
+    // 基金 C - 股票型 R4
+    {
+      id: 3,
+      name: '股票型-上岸必胜学习增强',
+      sector: '内卷',
+      price: 25.0,
+      previousPrice: 25.0,
+      held: 0,
+      history: [25.0],
+      volatility: 0.15,
+      consecutiveUpDays: 0,
+      isFund: true,
+      holdingDays: 0,
+      fundType: 'medium',
+      type: '股票型',
+      riskLevel: 'R4'
+    },
+    // 基金 D - 债券型 R1
+    {
+      id: 4,
+      name: '债券型-校园基建稳健债基',
+      sector: '基建',
+      price: 12.0,
+      previousPrice: 12.0,
+      held: 0,
+      history: [12.0],
+      volatility: 0.02,
+      consecutiveUpDays: 0,
+      isFund: true,
+      holdingDays: 0,
+      fundType: 'stable',
+      type: '债券型',
+      riskLevel: 'R1'
+    },
   ]);
 
   const [news, setNews] = useState('今天是游戏的第一天，股市平稳开盘。');
@@ -115,6 +179,33 @@ export default function DormTycoon() {
   // 添加日志
   const addLog = (message: string, type: Log['type'] = 'info') => {
     setLogs(prev => [...prev, { id: Date.now(), day: currentDay, message, type }]);
+  };
+
+  // 生成当日新闻
+  const generateDailyNews = (): string => {
+    const newsEvents = [
+      '今日校园气氛平稳，市场走势值得关注。',
+      '图书馆今天人满为患，看来大家都在努力学习！',
+      '食堂推出了新菜品，学生们络绎不绝。',
+      '社团活动丰富多彩，校园充满活力。',
+      '天气晴朗，适合外出活动。',
+      '期末临近，校园学习氛围渐浓。',
+      '求职季到了，同学们开始准备简历。',
+      '校园网络升级完成，网速大幅提升。',
+      '新学期开始，校园处处充满生机。',
+      '毕业季临近，校园里弥漫着离别的气息。',
+      '运动场扩建完成，体育设施更加完善。',
+      '校园超市促销活动火热进行中。',
+      '图书馆新增自习室，学习空间更加宽敞。',
+      '校园周边美食街开业，吃货们有福了！',
+      '校园广播站今日播放：努力奋斗，未来可期！',
+      '天气转凉，同学们注意添衣保暖。',
+      '校园文化节即将举办，各社团紧张筹备中。',
+      '新学期选课开始，热门课程瞬间爆满。',
+      '校园招聘会即将举办，知名企业将来校。',
+      '期末考试周即将来临，校园进入复习模式。',
+    ];
+    return newsEvents[Math.floor(Math.random() * newsEvents.length)];
   };
 
   // 计算资产总值
@@ -137,13 +228,6 @@ export default function DormTycoon() {
     const stock = stocks.find(s => s.id === stockId);
     if (!stock) return;
 
-    // 基金购买门槛检查
-    if (stock.isFund && intelligence < 20) {
-      addLog(`购买【校园混合成长基金】需要智力达到20！当前智力: ${intelligence}`, 'warning');
-      addLog(`提示：努力学习提升智力后即可解锁基金投资`, 'info');
-      return;
-    }
-
     // 投资限额检查
     const maxHolding = getMaxHolding();
     if (stock.held + amount > maxHolding) {
@@ -164,8 +248,8 @@ export default function DormTycoon() {
         return {
           ...s,
           held: s.held + amount,
-          // 如果是基金且之前没有持有，初始化holdingDays为0
-          holdingDays: s.isFund ? (s.holdingDays || 0) : undefined
+          // 初始化或保持holdingDays
+          holdingDays: s.holdingDays || 0
         };
       }
       return s;
@@ -173,7 +257,7 @@ export default function DormTycoon() {
     addLog(`买入 ${amount} 股 ${stock.name}，花费 ¥${cost.toFixed(2)}`, 'success');
   };
 
-  // 卖出股票
+  // 卖出基金
   const sellStock = (stockId: number, amount: number = 1) => {
     if (gameOver) return;
 
@@ -199,7 +283,7 @@ export default function DormTycoon() {
           ...s,
           held: newHeld,
           // 如果全部卖出，重置holdingDays
-          holdingDays: s.isFund && newHeld === 0 ? 0 : s.holdingDays
+          holdingDays: newHeld === 0 ? 0 : s.holdingDays
         };
       }
       return s;
@@ -301,142 +385,145 @@ export default function DormTycoon() {
     }
   };
 
-  // 随机事件生成器 - 包含联动事件
+  // 随机事件生成器 - 适配4只基金体系
   const generateRandomEvent = (): RandomEvent => {
     const events: RandomEvent[] = [
-      // 原有事件
+      // 消费类基金事件
       {
-        message: '学校突然断网，显卡相关股票暴跌！',
+        message: '社团招新季到来，校园消费热潮！',
         impact: (stocks: Stock[]) => {
-          const idx = stocks.findIndex(s => s.name.includes('显卡外设'));
-          if (idx !== -1) stocks[idx].price *= 0.7;
+          const idx = stocks.findIndex(s => s.name.includes('糖分消费'));
+          if (idx !== -1) stocks[idx].price *= 1.25;
         }
       },
       {
-        message: '社团招新季到来，奶茶生意火爆！',
+        message: '天气转凉，校园消费热情下降。',
         impact: (stocks: Stock[]) => {
-          const idx = stocks.findIndex(s => s.name.includes('蜜雪冰城'));
-          if (idx !== -1) stocks[idx].price *= 1.3;
+          const idx = stocks.findIndex(s => s.name.includes('糖分消费'));
+          if (idx !== -1) stocks[idx].price *= 0.85;
         }
+      },
+      // 硬件类基金事件
+      {
+        message: '【矿潮来袭】显卡价格暴涨！',
+        impact: (stocks: Stock[]) => {
+          const idx = stocks.findIndex(s => s.name.includes('赛博游戏'));
+          if (idx !== -1) stocks[idx].price *= 1.5;
+        }
+      },
+      {
+        message: '【深夜停电】全校停电，硬件需求暴跌！',
+        impact: (stocks: Stock[]) => {
+          const idx = stocks.findIndex(s => s.name.includes('赛博游戏'));
+          if (idx !== -1) stocks[idx].price *= 0.6;
+        }
+      },
+      {
+        message: '【新游发布】爆款游戏带动硬件销售！',
+        impact: (stocks: Stock[]) => {
+          const idx = stocks.findIndex(s => s.name.includes('赛博游戏'));
+          if (idx !== -1) stocks[idx].price *= 1.35;
+        }
+      },
+      {
+        message: '【显卡价格崩盘】矿难来临，显卡价格暴跌！',
+        impact: (stocks: Stock[]) => {
+          const idx = stocks.findIndex(s => s.name.includes('赛博游戏'));
+          if (idx !== -1) stocks[idx].price *= 0.55;
+        }
+      },
+      {
+        message: '【疯狂的宿管阿姨】宿管突然查寝，没收你的游戏设备！',
+        impact: (stocks: Stock[]) => {
+          const idx = stocks.findIndex(s => s.name.includes('赛博游戏'));
+          if (idx !== -1 && stocks[idx].held > 0) {
+            const confiscated = Math.floor(stocks[idx].held / 2);
+            stocks[idx].held -= confiscated;
+            setApologyPenalty(2);
+          }
+        }
+      },
+      // 内卷类基金事件
+      {
+        message: '【大厂提前批面试】知名企业开启提前批面试！',
+        impact: (stocks: Stock[], intelligence: number) => {
+          const idx = stocks.findIndex(s => s.name.includes('上岸必胜'));
+          if (idx !== -1) stocks[idx].price *= 1.2;
+          if (intelligence > 20) {
+            const idx2 = stocks.findIndex(s => s.name.includes('上岸必胜'));
+            if (idx2 !== -1) stocks[idx2].price *= 1.1;
+          }
+        },
+        studyCostMultiplier: 2
       },
       {
         message: '毕业季临近，求职培训需求激增！',
         impact: (stocks: Stock[]) => {
-          stocks.filter(s => s.sector === '内卷').forEach(s => s.price *= 1.2);
+          const idx = stocks.findIndex(s => s.name.includes('上岸必胜'));
+          if (idx !== -1) stocks[idx].price *= 1.2;
         }
       },
+      {
+        message: '期末考试周临近，上岸必胜基金全面上涨！',
+        impact: (stocks: Stock[]) => {
+          const idx = stocks.findIndex(s => s.name.includes('上岸必胜'));
+          if (idx !== -1) stocks[idx].price *= 1.25;
+        }
+      },
+      {
+        message: '知名企业来校宣讲，内卷板块受益！',
+        impact: (stocks: Stock[]) => {
+          const idx = stocks.findIndex(s => s.name.includes('上岸必胜'));
+          if (idx !== -1) stocks[idx].price *= 1.15;
+        }
+      },
+      // 基建类基金事件
+      {
+        message: '校园网络升级完成，基建板块受益！',
+        impact: (stocks: Stock[]) => {
+          const idx = stocks.findIndex(s => s.name.includes('基建稳健'));
+          if (idx !== -1) stocks[idx].price *= 1.08;
+        }
+      },
+      {
+        message: '【极端暴雨天气】连续暴雨，基建服务受影响！',
+        impact: (stocks: Stock[]) => {
+          const idx = stocks.findIndex(s => s.name.includes('基建稳健'));
+          if (idx !== -1) stocks[idx].price *= 0.95;
+        }
+      },
+      // 通用事件
       {
         message: '学校发布就业报告，整体市场平稳。',
         impact: () => {}
       },
       {
-        message: '知名企业来校宣讲，培训类股票上涨！',
-        impact: (stocks: Stock[]) => {
-          stocks.filter(s => s.sector === '内卷').forEach(s => s.price *= 1.15);
-        }
-      },
-      {
-        message: '天气转凉，奶茶销量下降。',
-        impact: (stocks: Stock[]) => {
-          const idx = stocks.findIndex(s => s.name.includes('蜜雪冰城'));
-          if (idx !== -1) stocks[idx].price *= 0.85;
-        }
-      },
-      // 新增联动事件
-      {
-        message: '【深夜停电】全校停电，显卡外设需求暴跌！',
-        impact: (stocks: Stock[]) => {
-          stocks.filter(s => s.name.includes('显卡外设')).forEach(s => s.price *= 0.5);
-        }
-      },
-      {
-        message: '【大厂提前批面试】知名企业开启提前批面试！',
-        impact: (stocks: Stock[], intelligence: number) => {
-          // 薪火求职瞬间拉升20%
-          const idx = stocks.findIndex(s => s.name.includes('薪火求职'));
-          if (idx !== -1) stocks[idx].price *= 1.2;
-          // 智力高的玩家能额外受益
-          if (intelligence > 20) {
-            stocks.filter(s => s.sector === '内卷').forEach(s => s.price *= 1.1);
-          }
-        },
-        studyCostMultiplier: 2 // 联动后果：学习精力消耗翻倍
-      },
-      {
-        message: '【极端暴雨天气】连续暴雨，共享单车无法运营！',
-        impact: (stocks: Stock[]) => {
-          // 共享单车跌停
-          stocks.filter(s => s.name.includes('共享单车')).forEach(s => s.price *= 0.6);
-          // 外卖服务上涨
-          stocks.filter(s => s.name.includes('外卖服务')).forEach(s => s.price *= 1.4);
-        }
-      },
-      {
-        message: '期末考试周临近，内卷板块全面上涨！',
-        impact: (stocks: Stock[]) => {
-          stocks.filter(s => s.sector === '内卷').forEach(s => s.price *= 1.25);
-          // 社交板块下跌
-          stocks.filter(s => s.sector === '社交').forEach(s => s.price *= 0.85);
-        }
-      },
-      {
-        message: '校园网络升级完成，基建板块受益！',
-        impact: (stocks: Stock[]) => {
-          stocks.filter(s => s.sector === '基建').forEach(s => s.price *= 1.2);
-        }
-      },
-      {
-        message: '外卖平台优惠活动，外卖服务股价上涨！',
-        impact: (stocks: Stock[]) => {
-          const idx = stocks.findIndex(s => s.name.includes('外卖服务'));
-          if (idx !== -1) stocks[idx].price *= 1.3;
-          // 共享单车略微下跌（大家都点外卖不骑车了）
-          const bikeIdx = stocks.findIndex(s => s.name.includes('共享单车'));
-          if (bikeIdx !== -1) stocks[bikeIdx].price *= 0.95;
-        }
-      },
-      {
-        message: '【疯狂的宿管阿姨】宿管突然查寝，没收了你的大功率显卡！',
-        impact: (stocks: Stock[]) => {
-          const idx = stocks.findIndex(s => s.name.includes('显卡外设'));
-          if (idx !== -1 && stocks[idx].held > 0) {
-            // 强制平仓50%
-            const confiscated = Math.floor(stocks[idx].held / 2);
-            stocks[idx].held -= confiscated;
-            setApologyPenalty(2); // 获得写检讨Buff，消耗2点行动点
-          }
-        }
-      },
-      {
-        message: '【被拉入了一个500人的资源共享群】你以为是内推机会，进去发现全是"拼好饭"和"砍一刀"。你感觉自己的梦想被"垂直拆解"并"无情对齐"了。',
+        message: '【被拉入500人群】精力-20，智力+2',
         impact: (stocks: Stock[]) => {
           setEnergy(prev => Math.max(0, prev - 20));
           setIntelligence(prev => prev + 2);
         }
       },
       {
-        message: '【舍友的疯狂报复】舍友搬回来了，怀恨在心的他偷偷在你的电脑上动了手脚！',
+        message: '【舍友的疯狂报复】舍友搬回来了，对你的投资组合动手！',
         impact: (stocks: Stock[]) => {
-          // 随机选择一只持仓股票强制平仓
           const heldStocks = stocks.filter(s => s.held > 0);
           if (heldStocks.length > 0) {
             const targetStock = heldStocks[Math.floor(Math.random() * heldStocks.length)];
-            const lost = Math.floor(targetStock.held * 0.3); // 损失30%
+            const lost = Math.floor(targetStock.held * 0.3);
             targetStock.held -= lost;
           }
         }
       },
       {
-        message: '【顺手牵羊】你发现桌上的零花钱少了，舍支一脸无辜地看着你。',
+        message: '【顺手牵羊】损失¥50',
         impact: (stocks: Stock[]) => {
           setCash(prev => Math.max(0, prev - 50));
         }
       },
       {
-        message: '【辅导员突击查寝】辅导员来检查宿舍卫生。',
-        impact: (stocks: Stock[]) => {
-          // 基础事件，额外效果在endDay中处理
-        }
+        message: '【辅导员突击查寝】检查宿舍卫生。',
+        impact: (stocks: Stock[]) => {}
       },
     ];
 
@@ -597,6 +684,10 @@ export default function DormTycoon() {
     const nextDay = currentDay + 1;
     setCurrentDay(nextDay);
 
+    // 生成当天的新闻
+    const dailyNews = generateDailyNews();
+    setNews(dailyNews);
+
     // 重置行动点，应用写检讨惩罚
     const finalActionPoints = Math.max(0, maxActionPoints - apologyPenalty);
     setActionPoints(finalActionPoints);
@@ -616,6 +707,9 @@ export default function DormTycoon() {
       setGameOver(true);
     } else {
       addLog(`=== 第 ${nextDay} 天 ===`, 'info');
+      // 触发每日新闻弹窗
+      setPendingNews(dailyNews);
+      setShowDailyNews(true);
     }
   };
 
@@ -647,22 +741,47 @@ export default function DormTycoon() {
       return;
     }
 
-    // 第一步：更新普通股票价格
+    // 更新所有基金价格 - 根据基金类型应用不同波动率算法
     let updatedStocks = stocks.map(stock => {
-      // 基金暂时跳过，稍后处理
-      if (stock.isFund) {
-        return stock;
+      let changePercent = 0;
+
+      switch (stock.fundType) {
+        case 'high': // 多巴胺综合、赛博消闲 - 极高/高波动
+          if (stock.name.includes('赛博消闲')) {
+            // 极高波动：容易受黑天鹅事件影响
+            // 基础波动 + 随机暴涨暴跌概率
+            const baseVolatility = (Math.random() - 0.5) * 0.6; // -30% ~ +30%
+            const blackSwan = Math.random() < 0.05 ? (Math.random() > 0.5 ? 0.4 : -0.4) : 0; // 5%概率暴涨/暴跌40%
+            changePercent = baseVolatility + blackSwan;
+          } else {
+            // 多巴胺综合 - 中高波动，受情绪影响大
+            changePercent = (Math.random() - 0.45) * 0.5; // -25% ~ +27.5%
+          }
+          break;
+
+        case 'medium': // 上岸必胜 - 中等波动 + 周期性
+          // 基础波动
+          const baseChange = (Math.random() - 0.5) * 0.2; // -10% ~ +10%
+
+          // 周期性：随着游戏天数推进，期末/校招季临近价格上涨
+          const dayProgress = currentDay / totalDays;
+          const cyclicalBonus = dayProgress * 0.01; // 每天额外0.01%上涨趋势
+
+          // 智力加成：智力越高越稳定且倾向于上涨
+          const intelligenceBonus = Math.min((intelligence - 10) * 0.005, 0.05);
+
+          changePercent = baseChange + cyclicalBonus + intelligenceBonus;
+          break;
+
+        case 'stable': // 基建稳健 - 极低波动
+          // 波动控制在 ±1%~±3% 以内
+          changePercent = (Math.random() - 0.5) * 0.06;
+          break;
+
+        default:
+          changePercent = (Math.random() - 0.5) * 0.1;
       }
 
-      // 普通股票定价逻辑
-      let volatility = stock.volatility;
-      if (stock.name === '考研真题集') {
-        // 智力越高，该股票越稳定且倾向于上涨
-        const intelligenceBonus = Math.min((intelligence - 10) * 0.01, 0.1);
-        volatility = Math.max(0.05, volatility - intelligenceBonus * 0.5);
-      }
-
-      const changePercent = (Math.random() - 0.45 + volatility) * (stock.volatility * 2);
       const newPrice = Math.max(1, stock.price * (1 + changePercent));
 
       // 更新连续上涨天数
@@ -678,52 +797,7 @@ export default function DormTycoon() {
       };
     });
 
-    // 第二步：基于更新后的普通股票，计算基金价格
-    updatedStocks = updatedStocks.map(stock => {
-      if (!stock.isFund) {
-        return stock;
-      }
-
-      // 计算各板块当天的涨跌幅（基于已更新的股票）
-      const sectorChanges: Record<string, number> = {};
-      ['内卷', '消费', '基建'].forEach(sector => {
-        const sectorStocks = updatedStocks.filter(s => s.sector === sector && !s.isFund);
-        if (sectorStocks.length > 0) {
-          const avgChange = sectorStocks.reduce((sum, s) => {
-            return sum + (s.price - s.previousPrice) / s.previousPrice;
-          }, 0) / sectorStocks.length;
-          sectorChanges[sector] = avgChange;
-        } else {
-          sectorChanges[sector] = 0;
-        }
-      });
-
-      // 基金价格 = 40%内卷 + 30%消费 + 30%基建
-      const fundChangePercent =
-        (sectorChanges['内卷'] || 0) * 0.4 +
-        (sectorChanges['消费'] || 0) * 0.3 +
-        (sectorChanges['基建'] || 0) * 0.3;
-
-      // 基金波动性更小，限制在±5%以内
-      const maxChange = 0.05;
-      const clampedChange = Math.max(-maxChange, Math.min(maxChange, fundChangePercent));
-
-      const newPrice = Math.max(1, stock.price * (1 + clampedChange));
-
-      // 更新连续上涨天数
-      const isUp = newPrice > stock.price;
-      const newConsecutiveUpDays = isUp ? stock.consecutiveUpDays + 1 : 0;
-
-      return {
-        ...stock,
-        previousPrice: stock.price,
-        price: Number(newPrice.toFixed(2)),
-        history: [...stock.history.slice(-6), Number(newPrice.toFixed(2))],
-        consecutiveUpDays: newConsecutiveUpDays,
-      };
-    });
-
-    // 泡沫破裂算法 - 检查连续上涨超过3天的股票
+    // 泡沫破裂算法 - 检查连续上涨超过3天的基金
     updatedStocks = updatedStocks.map(stock => {
       if (stock.consecutiveUpDays > 3) {
         // 从第4天开始，每天增加25%的崩盘概率
@@ -767,22 +841,22 @@ export default function DormTycoon() {
       if (!justiceMessenger || roommateGoneDays > 0) {
         // 不满足条件，重新生成一个普通事件
         const filteredEvents = [
-          '学校突然断网，显卡相关股票暴跌！',
-          '社团招新季到来，奶茶生意火爆！',
-          '毕业季临近，求职培训需求激增！',
-          '学校发布就业报告，整体市场平稳。',
-          '知名企业来校宣讲，培训类股票上涨！',
-          '天气转凉，奶茶销量下降。',
-          '【深夜停电】全校停电，显卡外设需求暴跌！',
+          '社团招新季到来，校园消费热潮！',
+          '天气转凉，校园消费热情下降。',
+          '【矿潮来袭】显卡价格暴涨！',
+          '【深夜停电】全校停电，硬件需求暴跌！',
+          '【新游发布】爆款游戏带动硬件销售！',
+          '【显卡价格崩盘】矿难来临，显卡价格暴跌！',
           '【大厂提前批面试】知名企业开启提前批面试！',
-          '【极端暴雨天气】连续暴雨，共享单车无法运营！',
-          '期末考试周临近，内卷板块全面上涨！',
+          '毕业季临近，求职培训需求激增！',
+          '期末考试周临近，上岸必胜基金全面上涨！',
+          '知名企业来校宣讲，内卷板块受益！',
           '校园网络升级完成，基建板块受益！',
-          '外卖平台优惠活动，外卖服务股价上涨！',
-          '【疯狂的宿管阿姨】宿管突然查寝，没收了你的大功率显卡！',
-          '【被拉入了一个500人的资源共享群】你以为是内推机会，进去发现全是"拼好饭"和"砍一刀"。你感觉自己的梦想被"垂直拆解"并"无情对齐"了。',
-          easygoing ? '【顺手牵羊】你发现桌上的零花钱少了，舍支一脸无辜地看着你。' : '学校发布就业报告，整体市场平稳。',
-          '【辅导员突击查寝】辅导员来检查宿舍卫生。',
+          '【极端暴雨天气】连续暴雨，基建服务受影响！',
+          '学校发布就业报告，整体市场平稳。',
+          '【被拉入500人群】精力-20，智力+2',
+          easygoing ? '【顺手牵羊】损失¥50' : '学校发布就业报告，整体市场平稳。',
+          '【辅导员突击查寝】检查宿舍卫生。',
         ];
         event = {
           message: filteredEvents[Math.floor(Math.random() * filteredEvents.length)],
@@ -809,15 +883,14 @@ export default function DormTycoon() {
 
     // 特殊事件的额外日志
     if (event.message.includes('疯狂的宿管阿姨')) {
-      const gpuStock = updatedStocks.find(s => s.name.includes('显卡外设'));
-      // 被没收的数量等于更新后持仓的相同数量（因为被没收了50%）
-      if (gpuStock && gpuStock.held > 0) {
-        addLog(`宿管阿姨没收了你 ${gpuStock.held} 股显卡外设（50%），明天需要写检讨消耗2点行动点`, 'warning');
+      const gameStock = updatedStocks.find(s => s.name.includes('赛博消闲'));
+      if (gameStock && gameStock.held > 0) {
+        addLog(`宿管阿姨没收了你 ${gameStock.held} 股股票型-赛博消闲娱乐ETF（50%），明天需要写检讨消耗2点行动点`, 'warning');
       } else {
-        addLog('幸好你没有持有显卡外设，逃过一劫', 'info');
+        addLog('幸好你没有持有股票型-赛博消闲娱乐ETF，逃过一劫', 'info');
       }
     }
-    if (event.message.includes('资源共享群')) {
+    if (event.message.includes('500人群')) {
       addLog('精力 -20，智力 +2（学会了如何识别垃圾信息）', 'info');
     }
     if (event.message.includes('舍友的疯狂报复')) {
@@ -841,51 +914,6 @@ export default function DormTycoon() {
       }
     }
 
-    // 联动后果：更新学习精力消耗倍率
-    if (event.studyCostMultiplier) {
-      setStudyCostMultiplier(event.studyCostMultiplier);
-      addLog(`全校都在卷！学习精力消耗翻倍！`, 'warning');
-    } else {
-      setStudyCostMultiplier(1);
-    }
-
-    // 板块联动逻辑
-    // 计算各板块的平均涨跌
-    const sectorPerformance: Record<string, number> = {};
-    ['内卷', '消费', '基建', '社交'].forEach(sector => {
-      const sectorStocks = updatedStocks.filter(s => s.sector === sector);
-      const avgChange = sectorStocks.reduce((sum, s) => sum + (s.price - s.previousPrice) / s.previousPrice, 0) / sectorStocks.length;
-      sectorPerformance[sector] = avgChange;
-    });
-
-    // 当"内卷"板块整体上涨时，增加"社交"板块下跌的概率
-    if (sectorPerformance['内卷'] > 0.1) {
-      updatedStocks = updatedStocks.map(s => {
-        if (s.sector === '社交' && Math.random() > 0.5) {
-          return { ...s, price: Math.max(1, s.price * 0.9) };
-        }
-        return s;
-      });
-      addLog('大家都在内卷学习，社交板块受到冷落', 'info');
-    }
-
-    // 当"基建"板块受损时，提升"消费"板块的离散波动
-    const infraLoss = updatedStocks
-      .filter(s => s.sector === '基建')
-      .some(s => s.price < s.previousPrice * 0.9);
-
-    if (infraLoss) {
-      updatedStocks = updatedStocks.map(s => {
-        if (s.sector === '消费') {
-          const volatility = 0.3;
-          const changePercent = (Math.random() - 0.5) * volatility;
-          return { ...s, price: Math.max(1, s.price * (1 + changePercent)) };
-        }
-        return s;
-      });
-      addLog('基础设施受损，消费板块剧烈波动', 'warning');
-    }
-
     setStocks(updatedStocks);
 
     // 清空明日预测
@@ -896,29 +924,32 @@ export default function DormTycoon() {
       setGoodCardDays(prev => prev - 1);
     }
 
-    // 基金复利分红系统
-    const fund = updatedStocks.find(s => s.isFund);
-    if (fund && fund.held > 0) {
-      const newHoldingDays = (fund.holdingDays || 0) + 1;
+    // 基金复利分红系统 - 所有基金都是基金
+    updatedStocks.forEach(fund => {
+      if (fund.held > 0) {
+        const newHoldingDays = (fund.holdingDays || 0) + 1;
 
-      // 持有超过3天，享受分红
-      if (newHoldingDays > 3) {
-        // 分红比例：智力>80时0.8%，否则0.5%
-        const dividendRate = intelligence > 80 ? 0.008 : 0.005;
-        const dividend = fund.held * fund.price * dividendRate;
+        // 持有超过3天，享受分红
+        if (newHoldingDays > 3) {
+          // 分红比例：智力>80时0.5%，否则0.3%
+          const dividendRate = intelligence > 80 ? 0.005 : 0.003;
+          const dividend = fund.held * fund.price * dividendRate;
 
-        if (dividend > 0) {
-          setCash(prev => prev + dividend);
-          const rateText = (dividendRate * 100).toFixed(1);
-          addLog(`【基金分红】校园混合成长基金分红 ¥${dividend.toFixed(2)}（${rateText}%）持有${newHoldingDays}天`, 'success');
+          if (dividend > 0) {
+            setCash(prev => prev + dividend);
+            const rateText = (dividendRate * 100).toFixed(1);
+            addLog(`【基金分红】${fund.name} 分红 ¥${dividend.toFixed(2)}（${rateText}%）持有${newHoldingDays}天`, 'success');
+          }
         }
-      }
 
-      // 更新基金的持有天数
-      updatedStocks = updatedStocks.map(s =>
-        s.isFund ? { ...s, holdingDays: newHoldingDays } : s
-      );
-    }
+        // 更新基金的持有天数
+        updatedStocks = updatedStocks.map(s =>
+          s.id === fund.id ? { ...s, holdingDays: newHoldingDays } : s
+        );
+      }
+    });
+
+    setStocks(updatedStocks);
 
     // 生成并触发财富招忌事件
     const wealthEvent = generateWealthEvent();
@@ -934,6 +965,10 @@ export default function DormTycoon() {
     // 进入下一天
     const nextDay = currentDay + 1;
     setCurrentDay(nextDay);
+
+    // 生成当天的新闻
+    const dailyNews = generateDailyNews();
+    setNews(dailyNews);
 
     // 重置行动点，应用写检讨惩罚
     const finalActionPoints = Math.max(0, maxActionPoints - apologyPenalty);
@@ -954,6 +989,9 @@ export default function DormTycoon() {
       setGameOver(true);
     } else {
       addLog(`=== 第 ${nextDay} 天 ===`, 'info');
+      // 触发每日新闻弹窗
+      setPendingNews(dailyNews);
+      setShowDailyNews(true);
     }
   };
 
@@ -1190,7 +1228,7 @@ export default function DormTycoon() {
                   '内卷': 'bg-[#B2DFDB]',
                   '消费': 'bg-[#F8BBD0]',
                   '基建': 'bg-[#BBDEFB]',
-                  '社交': 'bg-[#E1BEE7]',
+                  '硬件': 'bg-[#FFCCBC]',
                 };
 
                 // 持仓上限和泡沫警告
@@ -1199,31 +1237,29 @@ export default function DormTycoon() {
                 const isNearLimit = holdingPercentage >= 80;
                 const isBubbleRisk = stock.consecutiveUpDays >= 3;
 
-                // 基金特殊样式
-                const isFund = stock.isFund || false;
-
                 return (
                   <div
                     key={stock.id}
-                    className={`rounded-lg p-3 space-y-2 shadow-md ${
-                      isFund
-                        ? 'bg-gradient-to-br from-amber-200 to-yellow-200 border-2 border-amber-400 shadow-lg shadow-amber-500/20'
-                        : `bg-white ${isBubbleRisk ? 'ring-2 ring-red-500' : ''}`
-                    }`}
+                    className={`rounded-lg p-3 space-y-2 shadow-md bg-gradient-to-br from-amber-100 to-yellow-100 border-2 border-amber-300 ${isBubbleRisk ? 'ring-2 ring-red-500' : ''}`}
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 flex-wrap">
                           <span className={`text-xs px-2 py-0.5 rounded ${sectorColors[stock.sector]} text-gray-800`}>
                             {stock.sector}
                           </span>
-                          {isFund && (
-                            <span className="text-xs px-2 py-0.5 rounded bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold">
-                              🏆 基金
+                          {stock.type && (
+                            <span className="text-xs px-2 py-0.5 rounded bg-blue-500 text-white font-bold">
+                              {stock.type}
+                            </span>
+                          )}
+                          {stock.riskLevel && (
+                            <span className="text-xs px-2 py-0.5 rounded bg-purple-500 text-white font-bold">
+                              {stock.riskLevel}
                             </span>
                           )}
                         </div>
-                        <h3 className={`font-bold text-sm mt-1 ${isFund ? 'text-amber-800' : 'text-gray-900'}`}>{stock.name}</h3>
+                        <h3 className="font-bold text-sm mt-1 text-amber-900">{stock.name}</h3>
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         {isUp ? (
@@ -1234,14 +1270,14 @@ export default function DormTycoon() {
                         {isBubbleRisk && (
                           <span className="text-xs text-red-600 font-bold">⚠️ 泡沫</span>
                         )}
-                        {isFund && stock.holdingDays !== undefined && stock.holdingDays > 0 && (
+                        {stock.holdingDays !== undefined && stock.holdingDays > 0 && (
                           <span className="text-xs text-amber-700">📅 {stock.holdingDays}天</span>
                         )}
                       </div>
                     </div>
 
                     <div>
-                      <p className={`text-xl font-bold ${isFund ? 'text-amber-800' : 'text-gray-900'}`}>¥{stock.price.toFixed(2)}</p>
+                      <p className="text-xl font-bold text-amber-900">¥{stock.price.toFixed(2)}</p>
                       <p className={`text-xs ${isUp ? 'text-red-600' : 'text-green-600'}`}>
                         {isUp ? '+' : ''}{changePercent.toFixed(2)}%
                       </p>
@@ -1258,12 +1294,6 @@ export default function DormTycoon() {
                           </span>
                         )}
                       </div>
-                      {/* 基金智力门槛提示 */}
-                      {isFund && intelligence < 20 && (
-                        <div className="text-xs text-amber-700">
-                          🔒 需要智力 20 解锁
-                        </div>
-                      )}
                       {/* 持仓进度条 */}
                       <div className="w-full bg-gray-300 rounded-full h-1.5">
                         <div
@@ -1278,11 +1308,7 @@ export default function DormTycoon() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => buyStock(stock.id)}
-                        disabled={
-                          cash < stock.price ||
-                          stock.held >= maxHolding ||
-                          (stock.isFund && intelligence < 20)
-                        }
+                        disabled={cash < stock.price || stock.held >= maxHolding}
                         className="flex-1 py-1.5 text-sm bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded font-semibold transition text-white"
                       >
                         买入
@@ -1466,6 +1492,25 @@ export default function DormTycoon() {
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 每日新闻弹窗 */}
+      {showDailyNews && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full border-2 border-blue-500 shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-2xl font-bold text-blue-600">📰 每日校园新闻</h3>
+              <div className="text-sm text-gray-500">第 {currentDay} 天</div>
+            </div>
+            <p className="text-gray-700 mb-6 text-lg leading-relaxed">{pendingNews}</p>
+            <button
+              onClick={() => setShowDailyNews(false)}
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition"
+            >
+              开始新的一天
+            </button>
           </div>
         </div>
       )}
