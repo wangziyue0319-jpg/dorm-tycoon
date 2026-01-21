@@ -52,6 +52,10 @@ interface ChoiceEvent {
     text: string;
     action: () => void;
   };
+  optionC?: {
+    text: string;
+    action: () => void;
+  };
 }
 
 interface Log {
@@ -80,6 +84,14 @@ export default function DormTycoon() {
   const [actionPoints, setActionPoints] = useState(2); // 当前行动点
   const [maxActionPoints] = useState(2); // 每日行动点上限
   const [actionToast, setActionToast] = useState(false); // 行动点不足提示
+  const [apologyPenalty, setApologyPenalty] = useState(0); // 写检讨惩罚（消耗行动点）
+
+  // 舍友抽烟事件相关状态
+  const [justiceMessenger, setJusticeMessenger] = useState(false); // 正义使者称号（等待报复）
+  const [roommateGoneDays, setRoommateGoneDays] = useState(0); // 舍友搬离剩余天数
+  const [easygoing, setEasygoing] = useState(false); // 好说话标记（提升顺手牵羊概率）
+  const [hasBadReputation, setHasBadReputation] = useState(false); // 变坏标记（辅导员查寝时可能被判定为从犯）
+  const [maxEnergyBonus, setMaxEnergyBonus] = useState(0); // 精力上限加成
 
   // 股票数据 - 扩充到7只 + 1只基金
   const [stocks, setStocks] = useState<Stock[]>([
@@ -277,7 +289,8 @@ export default function DormTycoon() {
     if (gameOver) return;
 
     const bonus = goodCardDays > 0 ? 10 : 0;
-    setEnergy(prev => Math.min(100, prev + 50 + bonus));
+    const maxEnergy = 100 + maxEnergyBonus;
+    setEnergy(prev => Math.min(maxEnergy, prev + 50 + bonus));
 
     // 注意：行动点不会在休息时恢复，只在结束一天进入第二天时才恢复
 
@@ -382,6 +395,49 @@ export default function DormTycoon() {
           if (bikeIdx !== -1) stocks[bikeIdx].price *= 0.95;
         }
       },
+      {
+        message: '【疯狂的宿管阿姨】宿管突然查寝，没收了你的大功率显卡！',
+        impact: (stocks: Stock[]) => {
+          const idx = stocks.findIndex(s => s.name.includes('显卡外设'));
+          if (idx !== -1 && stocks[idx].held > 0) {
+            // 强制平仓50%
+            const confiscated = Math.floor(stocks[idx].held / 2);
+            stocks[idx].held -= confiscated;
+            setApologyPenalty(2); // 获得写检讨Buff，消耗2点行动点
+          }
+        }
+      },
+      {
+        message: '【被拉入了一个500人的资源共享群】你以为是内推机会，进去发现全是"拼好饭"和"砍一刀"。你感觉自己的梦想被"垂直拆解"并"无情对齐"了。',
+        impact: (stocks: Stock[]) => {
+          setEnergy(prev => Math.max(0, prev - 20));
+          setIntelligence(prev => prev + 2);
+        }
+      },
+      {
+        message: '【舍友的疯狂报复】舍友搬回来了，怀恨在心的他偷偷在你的电脑上动了手脚！',
+        impact: (stocks: Stock[]) => {
+          // 随机选择一只持仓股票强制平仓
+          const heldStocks = stocks.filter(s => s.held > 0);
+          if (heldStocks.length > 0) {
+            const targetStock = heldStocks[Math.floor(Math.random() * heldStocks.length)];
+            const lost = Math.floor(targetStock.held * 0.3); // 损失30%
+            targetStock.held -= lost;
+          }
+        }
+      },
+      {
+        message: '【顺手牵羊】你发现桌上的零花钱少了，舍支一脸无辜地看着你。',
+        impact: (stocks: Stock[]) => {
+          setCash(prev => Math.max(0, prev - 50));
+        }
+      },
+      {
+        message: '【辅导员突击查寝】辅导员来检查宿舍卫生。',
+        impact: (stocks: Stock[]) => {
+          // 基础事件，额外效果在endDay中处理
+        }
+      },
     ];
 
     const event = events[Math.floor(Math.random() * events.length)];
@@ -475,6 +531,39 @@ export default function DormTycoon() {
             addLog('电脑未维修，交易功能锁定', 'error');
           }
         }
+      },
+      {
+        id: 'roommate-smoking',
+        title: '【舍友偷偷抽烟】',
+        description: '深夜，你被一阵极其隐蔽的打火机声惊醒。睁眼一看，那个讨厌的舍友正蹲在阳台角落"吞云吐雾"，烟味已经飘满了寝室。',
+        optionA: {
+          text: '反手一个举报（精力上限+20，正义使者称号）',
+          action: () => {
+            setMaxEnergyBonus(20);
+            setJusticeMessenger(true);
+            setRoommateGoneDays(3);
+            addLog('你举报了舍友抽烟！他被处分并搬离3天。精力上限+20，获得【正义使者】称号', 'success');
+          }
+        },
+        optionB: {
+          text: '假装没看见（-10精力，顺手牵羊概率+20%）',
+          action: () => {
+            setEnergy(prev => Math.max(0, prev - 10));
+            setEasygoing(true);
+            addLog('你选择了沉默，舍友觉得你"好说话"。精力-10，未来"顺手牵羊"事件概率提升', 'warning');
+          }
+        },
+        optionC: {
+          text: '以此要挟（+¥150，基金内部消息，智力-5）',
+          action: () => {
+            setCash(prev => prev + 150);
+            setIntelligence(prev => prev - 5);
+            setHasBadReputation(true);
+            setTomorrowForecast(['校园混合成长基金: 内部消息显示将上涨']);
+            addLog('你收了舍友¥150封口费，获得基金内部消息。但你变坏了...智力-5', 'success');
+            addLog('警告：若触发"辅导员查寝"事件，你有30%概率被判定为从犯', 'warning');
+          }
+        }
       }
     ];
 
@@ -482,7 +571,7 @@ export default function DormTycoon() {
   };
 
   // 处理抉择事件选择
-  const handleChoice = (option: 'A' | 'B') => {
+  const handleChoice = (option: 'A' | 'B' | 'C') => {
     if (!currentChoiceEvent) return;
 
     // 如果是电脑蓝屏事件，选择维修则解锁交易
@@ -496,8 +585,10 @@ export default function DormTycoon() {
 
     if (option === 'A') {
       currentChoiceEvent.optionA.action();
-    } else {
+    } else if (option === 'B') {
       currentChoiceEvent.optionB.action();
+    } else if (option === 'C' && currentChoiceEvent.optionC) {
+      currentChoiceEvent.optionC.action();
     }
 
     setCurrentChoiceEvent(null);
@@ -505,7 +596,14 @@ export default function DormTycoon() {
     // 继续完成一天结算
     const nextDay = currentDay + 1;
     setCurrentDay(nextDay);
-    setActionPoints(maxActionPoints); // 重置行动点
+
+    // 重置行动点，应用写检讨惩罚
+    const finalActionPoints = Math.max(0, maxActionPoints - apologyPenalty);
+    setActionPoints(finalActionPoints);
+    if (apologyPenalty > 0) {
+      addLog(`【写检讨】宿管阿姨要求写检讨，行动点 -${apologyPenalty}`, 'warning');
+      setApologyPenalty(0); // 重置惩罚
+    }
 
     // 检查游戏胜利
     if (nextDay > totalDays) {
@@ -652,12 +750,96 @@ export default function DormTycoon() {
       return stock;
     });
 
-    // 触发随机事件
-    const event = generateRandomEvent();
+    // 处理舍友搬离天数倒计时
+    if (roommateGoneDays > 0) {
+      const newDays = roommateGoneDays - 1;
+      setRoommateGoneDays(newDays);
+      if (newDays === 0) {
+        addLog('舍友搬回来了...他似乎还记恨着你的举报', 'warning');
+      }
+    }
+
+    // 触发随机事件（需要特殊处理舍友报复事件）
+    let event = generateRandomEvent();
+
+    // 如果是舍友报复事件，检查是否满足触发条件
+    if (event.message.includes('舍友的疯狂报复')) {
+      if (!justiceMessenger || roommateGoneDays > 0) {
+        // 不满足条件，重新生成一个普通事件
+        const filteredEvents = [
+          '学校突然断网，显卡相关股票暴跌！',
+          '社团招新季到来，奶茶生意火爆！',
+          '毕业季临近，求职培训需求激增！',
+          '学校发布就业报告，整体市场平稳。',
+          '知名企业来校宣讲，培训类股票上涨！',
+          '天气转凉，奶茶销量下降。',
+          '【深夜停电】全校停电，显卡外设需求暴跌！',
+          '【大厂提前批面试】知名企业开启提前批面试！',
+          '【极端暴雨天气】连续暴雨，共享单车无法运营！',
+          '期末考试周临近，内卷板块全面上涨！',
+          '校园网络升级完成，基建板块受益！',
+          '外卖平台优惠活动，外卖服务股价上涨！',
+          '【疯狂的宿管阿姨】宿管突然查寝，没收了你的大功率显卡！',
+          '【被拉入了一个500人的资源共享群】你以为是内推机会，进去发现全是"拼好饭"和"砍一刀"。你感觉自己的梦想被"垂直拆解"并"无情对齐"了。',
+          easygoing ? '【顺手牵羊】你发现桌上的零花钱少了，舍支一脸无辜地看着你。' : '学校发布就业报告，整体市场平稳。',
+          '【辅导员突击查寝】辅导员来检查宿舍卫生。',
+        ];
+        event = {
+          message: filteredEvents[Math.floor(Math.random() * filteredEvents.length)],
+          impact: () => {}
+        } as RandomEvent;
+      }
+    }
+
+    // 如果是顺手牵羊事件且玩家没有"好说话"标记，有概率替换成普通事件
+    if (event.message.includes('顺手牵羊') && !easygoing) {
+      if (Math.random() > 0.3) {
+        // 70%概率不触发
+        event = {
+          message: '学校发布就业报告，整体市场平稳。',
+          impact: () => {}
+        } as RandomEvent;
+      }
+    }
+
     event.impact(updatedStocks, intelligence);
     setStocks(updatedStocks);
     setNews(event.message);
     addLog(`【${event.message}】`, 'info');
+
+    // 特殊事件的额外日志
+    if (event.message.includes('疯狂的宿管阿姨')) {
+      const gpuStock = updatedStocks.find(s => s.name.includes('显卡外设'));
+      // 被没收的数量等于更新后持仓的相同数量（因为被没收了50%）
+      if (gpuStock && gpuStock.held > 0) {
+        addLog(`宿管阿姨没收了你 ${gpuStock.held} 股显卡外设（50%），明天需要写检讨消耗2点行动点`, 'warning');
+      } else {
+        addLog('幸好你没有持有显卡外设，逃过一劫', 'info');
+      }
+    }
+    if (event.message.includes('资源共享群')) {
+      addLog('精力 -20，智力 +2（学会了如何识别垃圾信息）', 'info');
+    }
+    if (event.message.includes('舍友的疯狂报复')) {
+      const heldStocks = updatedStocks.filter(s => s.held > 0);
+      if (heldStocks.length > 0) {
+        const targetStock = heldStocks[Math.floor(Math.random() * heldStocks.length)];
+        const lost = Math.floor(targetStock.held * 0.3);
+        addLog(`舍友报复！${targetStock.name} 被恶意操作，损失 ${lost} 股（30%）`, 'error');
+      }
+      setJusticeMessenger(false); // 报复后清除标记
+    }
+    if (event.message.includes('顺手牵羊')) {
+      addLog('损失¥50（因为舍友觉得你"好说话"）', 'warning');
+    }
+    if (event.message.includes('辅导员突击查寝')) {
+      if (hasBadReputation && Math.random() < 0.3) {
+        setCash(prev => Math.max(0, prev - 100));
+        addLog('你被判定为从犯，罚款¥100！', 'error');
+      } else {
+        addLog('检查结束，一切正常', 'info');
+      }
+    }
 
     // 联动后果：更新学习精力消耗倍率
     if (event.studyCostMultiplier) {
@@ -752,7 +934,14 @@ export default function DormTycoon() {
     // 进入下一天
     const nextDay = currentDay + 1;
     setCurrentDay(nextDay);
-    setActionPoints(maxActionPoints); // 重置行动点
+
+    // 重置行动点，应用写检讨惩罚
+    const finalActionPoints = Math.max(0, maxActionPoints - apologyPenalty);
+    setActionPoints(finalActionPoints);
+    if (apologyPenalty > 0) {
+      addLog(`【写检讨】宿管阿姨要求写检讨，行动点 -${apologyPenalty}`, 'warning');
+      setApologyPenalty(0); // 重置惩罚
+    }
 
     // 检查游戏胜利
     if (nextDay > totalDays) {
@@ -933,7 +1122,7 @@ export default function DormTycoon() {
               <Zap className="text-yellow-600" size={24} />
               <div>
                 <p className="text-xs text-gray-600">精力</p>
-                <p className="text-xl font-bold text-gray-900">{energy}/100</p>
+                <p className="text-xl font-bold text-gray-900">{energy}/{100 + maxEnergyBonus}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -1247,7 +1436,7 @@ export default function DormTycoon() {
       {/* 抉择事件弹窗 */}
       {currentChoiceEvent && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full border-2 border-orange-500 shadow-xl">
+          <div className={`bg-white rounded-lg p-6 ${currentChoiceEvent.optionC ? 'max-w-2xl' : 'max-w-lg'} w-full border-2 border-orange-500 shadow-xl`}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-2xl font-bold text-orange-600">{currentChoiceEvent.title}</h3>
             </div>
@@ -1267,6 +1456,15 @@ export default function DormTycoon() {
                 <div className="font-bold mb-1">B. {currentChoiceEvent.optionB.text.split('(')[0]}</div>
                 <div className="text-sm text-red-100">({currentChoiceEvent.optionB.text.split('(')[1]}</div>
               </button>
+              {currentChoiceEvent.optionC && (
+                <button
+                  onClick={() => handleChoice('C')}
+                  className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition text-left px-6"
+                >
+                  <div className="font-bold mb-1">C. {currentChoiceEvent.optionC.text.split('(')[0]}</div>
+                  <div className="text-sm text-purple-100">({currentChoiceEvent.optionC.text.split('(')[1]}</div>
+                </button>
+              )}
             </div>
           </div>
         </div>
