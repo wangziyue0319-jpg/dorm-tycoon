@@ -279,13 +279,12 @@ export default function DormTycoon() {
     const bonus = goodCardDays > 0 ? 10 : 0;
     setEnergy(prev => Math.min(100, prev + 50 + bonus));
 
-    // 重置行动点，让玩家可以继续新的一天
-    setActionPoints(maxActionPoints);
+    // 注意：行动点不会在休息时恢复，只在结束一天进入第二天时才恢复
 
     if (bonus > 0) {
-      addLog(`好好休息，精力+${50 + bonus}（好人卡加成+${bonus}），行动点已恢复`, 'success');
+      addLog(`好好休息，精力+${50 + bonus}（好人卡加成+${bonus}）`, 'success');
     } else {
-      addLog('好好休息，精力+50，行动点已恢复', 'success');
+      addLog('好好休息，精力+50', 'success');
     }
   };
 
